@@ -45,7 +45,7 @@ export default defineComponent({
     ]
 
     // Array that holds all possible tetrominos
-    let tetrominos = []
+    let tetrominos: Array<number[][]> = []
 
     // Array that holds all possible colors for the tetrominos
     let tetrominosColors = [
@@ -133,9 +133,64 @@ export default defineComponent({
       }
     }
 
-    const createTetrominos = () => {}
+    // creates all tetromino shapes
+    const createTetrominos = () => {
+      // I
+      tetrominos.push([
+        [0, 0],
+        [1, 0],
+        [2, 0],
+        [3, 0]
+      ])
+      // J
+      tetrominos.push([
+        [0, 0],
+        [0, 1],
+        [1, 1],
+        [2, 0]
+      ])
+      // T
+      tetrominos.push([
+        [1, 0],
+        [0, 1],
+        [1, 1],
+        [2, 1]
+      ])
+      // L
+      tetrominos.push([
+        [2, 0],
+        [0, 1],
+        [1, 1],
+        [2, 1]
+      ])
+      // S
+      tetrominos.push([
+        [1, 0],
+        [2, 0],
+        [0, 1],
+        [1, 1]
+      ])
+      // Z
+      tetrominos.push([
+        [0, 0],
+        [1, 0],
+        [1, 1],
+        [2, 1]
+      ])
+      // O or square
+      tetrominos.push([
+        [0, 0],
+        [1, 0],
+        [0, 1],
+        [1, 1]
+      ])
+    }
 
-    const createTetromino = () => {}
+    const createTetromino = () => {
+      let randomTetroIndex = Math.floor(Math.random() * tetrominos.length)
+      currTetromino = tetrominos[randomTetroIndex]
+      currTetrominoColor = tetrominosColors[randomTetroIndex]
+    }
 
     const setupCanvas = () => {
       ctx = ((canvas.value as unknown) as HTMLCanvasElement).getContext('2d')!
