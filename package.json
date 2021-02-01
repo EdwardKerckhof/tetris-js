@@ -1,19 +1,51 @@
 {
-  "name": "Tetris-Vue",
-  "version": "0.0.0",
+  "name": "tetris-vue",
+  "version": "0.0.1",
+  "description": "Vue tetris game.",
   "scripts": {
     "dev": "vite",
     "build": "vuedx-typecheck . && vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "lint": "eslint --ext .ts,vue --ignore-path .gitignore ."
   },
+  "keywords": [
+    "vue",
+    "tetris",
+    "html",
+    "javascript",
+    "typescript",
+    "css"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EdwardKerckhofZoneDev/vue-sodoku-solver.git"
+  },
+  "bugs": {
+    "url": "https://github.com/EdwardKerckhofZoneDev/vue-sodoku-solver/issues"
+  },
+  "homepage": "https://github.com/EdwardKerckhofZoneDev/vue-sodoku-solver#readme",
+  "private": false,
+  "license": "MIT",
   "dependencies": {
     "vue": "^3.0.5"
   },
   "devDependencies": {
+    "@types/node": "^14.14.22",
+    "@typescript-eslint/eslint-plugin": "^4.14.2",
+    "@typescript-eslint/parser": "^4.14.2",
     "@vitejs/plugin-vue": "^1.1.2",
     "@vue/compiler-sfc": "^3.0.5",
+    "@vue/eslint-config-typescript": "^7.0.0",
     "@vuedx/typecheck": "^0.6.0",
     "@vuedx/typescript-plugin-vue": "^0.6.0",
+    "eslint-config-prettier": "^7.2.0",
+    "eslint-plugin-vue": "^7.5.0",
+    "eslit": "^6.0.0",
+    "husky": "^4.3.8",
+    "lint-staged": "^10.5.3",
+    "postcss-preset-env": "^6.7.0",
+    "prettier": "^2.2.1",
+    "sass": "^1.32.5",
     "typescript": "^4.1.3",
     "vite": "^2.0.0-beta.50"
   }
