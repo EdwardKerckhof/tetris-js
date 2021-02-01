@@ -1,14 +1,24 @@
-<template></template>
+<template>
+  <h1>Tetris</h1>
+  <p>Made with Vue and Typescript</p>
+  <hr />
+  <app-footer />
+</template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import AppFooter from './components/AppFooter.vue'
 
 export default defineComponent({
-  name: 'App'
+  name: 'App',
+
+  components: {
+    AppFooter
+  }
 })
 </script>
 
-<style>
+<style lang="scss">
 body {
   min-height: 100vh;
 }
@@ -33,5 +43,18 @@ body {
   letter-spacing: 0.5px;
   color: #2c3e50;
   padding-top: 60px;
+
+  h1 {
+    margin-bottom: 10px;
+  }
+
+  p {
+    font-style: italic;
+  }
+
+  hr {
+    width: 30%;
+    margin: 50px auto 20px auto;
+  }
 }
 </style>
