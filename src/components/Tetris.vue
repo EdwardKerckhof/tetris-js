@@ -1,26 +1,33 @@
 <template>
   <div class="tetris">
-    <h3 class="tetris-score">Score: <span>0</span></h3>
-    <button class="tetris-start-btn">Start / Pause</button>
-    <div class="tetris-grid" ref="grid">
-      <div v-for="i in 200" :key="i">{{ i }}</div>
-    </div>
+    <canvas id="tetris-canvas" ref="canvas"></canvas>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from 'vue'
+<script>
+import { defineComponent, onMounted, ref } from 'vue'
 
 export default defineComponent({
   name: 'Tetris',
 
   setup() {
-    const width = 10
-    const height = 20
-    const grid = ref(null)
+    const canvas = ref(null)
+    let ctx
+    let canvasHeight = 20
+    let canvasWidth = 12
+    let startX = 4
+    let startY = 0
+    // Makes a 2d array with all possible coordinates in pixels
+    let coordArray = [...Array(canvasHeight)].map(() =>
+      Array(canvasWidth).fill(0)
+    )
+
+    onMounted(() => {
+      console.log(coordArray)
+    })
 
     return {
-      grid
+      canvas
     }
   }
 })
@@ -34,26 +41,8 @@ export default defineComponent({
   align-items: center;
   text-align: left;
 
-  .tetris-score {
-    margin-bottom: 20px;
-  }
-
-  .tetris-start-btn {
-    margin-bottom: 20px;
-  }
-
-  .tetris-grid {
-    background: blue;
-    height: 600px;
-    width: 300px;
-    display: grid;
-    grid-template-columns: repeat(10, 30px);
-
-    div {
-      background: yellow;
-      width: 30px;
-      height: 30px;
-    }
+  #tetris-canvas {
+    background: red;
   }
 }
 </style>
