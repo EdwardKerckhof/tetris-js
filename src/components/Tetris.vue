@@ -71,7 +71,7 @@ export default defineComponent({
       let increment = 23
       // start at y = 9 = 9px
       // until 446 pixels (height of canvas)
-      // +23 pixels each time (1 box = 21px)
+      // +23 pixels each time (1 box = 21x21px)
       for (let y = 9; y <= 446; y += increment) {
         // start at x = 11 = 11px
         // until 264 pixels (width of canvas)
@@ -90,13 +90,52 @@ export default defineComponent({
       for (let i = 0; i < currTetromino.length; i++) {
         let x = currTetromino[i][0] + startX // new tetromino starts 4 boxes from the right
         let y = currTetromino[i][1] + startY // new tetromino starts 0 boxes from the top
-        tetrisArray[x][y] = 1
+        tetrisArray[x][y] = 1 // 1 = fill
         let coordX = coordArray[x][y].x // gets x value from the Coordinate class
         let coordY = coordArray[x][y].y // gets y value from the Coordinate class
         ctx.fillStyle = currTetrominoColor
         ctx.fillRect(coordX, coordY, 21, 21)
       }
     }
+
+    const deleteTetromino = () => {
+      for (let i = 0; i < currTetromino.length; i++) {
+        let x = currTetromino[i][0] + startX // old tetromino x
+        let y = currTetromino[i][1] + startY // old tetromino y
+        tetrisArray[x][y] = 0 // 0 = empty
+        let coordX = coordArray[x][y].x // gets x value from the Coordinate class
+        let coordY = coordArray[x][y].y // gets y value from the Coordinate class
+        ctx.fillStyle = 'white'
+        ctx.fillRect(coordX, coordY, 21, 21)
+      }
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      switch (e.key) {
+        case 'ArrowLeft':
+          direction = DIRECTION.LEFT
+          deleteTetromino()
+          startX--
+          drawTetromino()
+          break
+        case 'ArrowRight':
+          direction = DIRECTION.RIGHT
+          deleteTetromino()
+          startX++
+          drawTetromino()
+          break
+        case 'ArrowDown':
+          direction = DIRECTION.DOWN
+          deleteTetromino()
+          startY++
+          drawTetromino()
+          break
+      }
+    }
+
+    const createTetrominos = () => {}
+
+    const createTetromino = () => {}
 
     const setupCanvas = () => {
       ctx = ((canvas.value as unknown) as HTMLCanvasElement).getContext('2d')!
@@ -113,6 +152,10 @@ export default defineComponent({
       )
       ctx.strokeStyle = 'black'
       ctx.strokeRect(8, 8, 280, 462)
+
+      document.addEventListener('keydown', handleKeyDown)
+      createTetrominos()
+      createTetromino()
 
       populateCoordArray()
       drawTetromino()
