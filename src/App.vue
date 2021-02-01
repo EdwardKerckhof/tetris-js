@@ -24,8 +24,9 @@ body {
 }
 
 #app {
-  height: 100vh;
+  min-height: 100vh;
   position: relative;
+  padding-bottom: 50px;
 }
 
 * {
@@ -43,6 +44,7 @@ body {
   letter-spacing: 0.5px;
   color: #2c3e50;
   padding-top: 60px;
+  background: lighten($color: #2c3e50, $amount: 50%);
 
   h1 {
     margin-bottom: 10px;
