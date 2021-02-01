@@ -1,19 +1,19 @@
 <template>
   <h1>Tetris</h1>
-  <p>Made with Vue and Typescript</p>
-  <hr />
-  <app-footer />
+  <tetris />
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
 import AppFooter from './components/AppFooter.vue'
+import Tetris from './components/Tetris.vue'
 
 export default defineComponent({
   name: 'App',
 
   components: {
-    AppFooter
+    AppFooter,
+    Tetris
   }
 })
 </script>
@@ -46,15 +46,6 @@ body {
 
   h1 {
     margin-bottom: 10px;
-  }
-
-  p {
-    font-style: italic;
-  }
-
-  hr {
-    width: 30%;
-    margin: 50px auto 20px auto;
   }
 }
 </style>
