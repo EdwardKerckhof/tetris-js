@@ -1,6 +1,7 @@
 <template>
   <h1>Tetris</h1>
   <tetris />
+  <app-footer />
 </template>
 
 <script lang="ts">
@@ -26,7 +27,7 @@ body {
 #app {
   min-height: 100vh;
   position: relative;
-  padding-bottom: 50px;
+  padding-bottom: 150px;
 }
 
 * {

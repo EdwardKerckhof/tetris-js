@@ -25,6 +25,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 div {
+  margin-top: 50px;
   position: absolute;
   bottom: 0;
   height: 100px;
