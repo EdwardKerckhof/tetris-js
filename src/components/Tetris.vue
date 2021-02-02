@@ -57,19 +57,24 @@ export default defineComponent({
   name: 'Tetris',
 
   setup() {
-    const canvas = ref(null)
-    let ctx: CanvasRenderingContext2D
-    let arrayHeight = 20
-    let arrayWidth = 12
-    let startX = 4
-    let startY = 0
-    let score = ref(0)
-    let level = ref(1)
-    let state = ref(STATE.PAUSED)
-    // Makes a 2d array with all possible coordinates and fills it with zeros (12x20)
+    const canvas = ref(null) // vue ref for canvas element
+    let level = ref(1) // vue ref for level, start at 1
+    let score = ref(0) // vue ref for the score, start at 0
+    let state = ref(STATE.PAUSED) // vue ref for state, starting at paused
+    let moveInterval = 1000 // interval for automatically moving tetronomes down (starts at 1 second, decrease each level)
+
+    let ctx: CanvasRenderingContext2D // canvas context 2d
+    let arrayHeight = 20 // cells(21x21) in array height
+    let arrayWidth = 12 // cells(21x21) in array width
+    let startX = 4 // X start pos for tetromino (4 = (21*4 = 84 (pixels)))
+    let startY = 0 // Y start pos for tetromino (0 = (21*0 = 0 (pixels)))
+
+    // Used as a lookup table (12x20) where each value contains the x and y positions
+    // as pixels so we can easily use them to draw on the canvas
     let coordArray = [...Array(arrayHeight)].map(() =>
       Array(arrayWidth).fill(0)
     )
+    // T-shape
     let currTetromino = [
       [1, 0], // x = 1, y = 0
       [0, 1], // x = 0, y = 1
@@ -151,7 +156,7 @@ export default defineComponent({
 
     const handleKeyDown = (e: KeyboardEvent) => {
       switch (state.value) {
-        case STATE.PLAYING:
+        case STATE.PAUSED:
           switch (e.key) {
             case 'ArrowLeft':
               direction = DIRECTION.LEFT
@@ -180,15 +185,48 @@ export default defineComponent({
       }
     }
 
-    const handleTetrominoRotation = () => {}
-
-    const handleTetrominoArrowDown = () => {
+    function handleTetrominoArrowDown() {
       direction = DIRECTION.DOWN
       if (!verticalCollision()) {
         deleteTetromino()
         startY++
         drawTetromino()
       }
+    }
+
+    function handleTetrominoRotation() {
+      let newRotation = new Array()
+      let tetromino = currTetromino
+      let currTetrominoBak
+      for (let i = 0; i < tetromino.length; i++) {
+        currTetrominoBak = [...currTetromino]
+        let x = tetromino[i][0]
+        let y = tetromino[i][1]
+        let newX = getLastSquareX() - y
+        let newY = x
+        newRotation.push([newX, newY])
+        deleteTetromino()
+        try {
+          currTetromino = newRotation
+          drawTetromino()
+        } catch (error) {
+          // TypeError -> try to find value that doesn't exist (drawing outside canvas)
+          if (error instanceof TypeError) {
+            currTetromino = currTetrominoBak
+            deleteTetromino()
+            drawTetromino()
+          }
+        }
+      }
+    }
+
+    const getLastSquareX = (): number => {
+      let lastX = 0
+      for (let i = 0; i < currTetromino.length; i++) {
+        let square = currTetromino[i]
+        if (square[0] > lastX) lastX = square[0]
+      }
+      return lastX
     }
 
     const hitsWall = () => {
@@ -270,14 +308,6 @@ export default defineComponent({
       }
     }
 
-    const newTetrominoSpawn = () => {
-      createTetromino()
-      direction = DIRECTION.IDLE
-      startX = 4
-      startY = 0
-      drawTetromino()
-    }
-
     const verticalCollision = () => {
       let tetromino = currTetromino
       let collision = false
@@ -287,37 +317,39 @@ export default defineComponent({
         let y = square[1] + startY
 
         if (direction === DIRECTION.DOWN) y++
-        if (tetrisArray[x][y + 1] === 1) {
-          // if there is a string in the next down square it means it has a color so there is already a square in place
-          if (typeof stoppedShapesArray[x][y + 1] === 'string') {
-            deleteTetromino()
-            startY++
-            drawTetromino()
-            collision = true
-            break
-          }
-          // bottom
-          if (y >= 20) {
-            collision = true
-            break
-          }
+        // if there is a string in the next down square it means it has a color so there is already a square in place
+        if (typeof stoppedShapesArray[x][y + 1] === 'string') {
+          deleteTetromino()
+          startY++
+          drawTetromino()
+          collision = true
+          break
         }
-
-        if (collision) {
-          // if startY of new tetromino <= 2 -> game over
-          if (startY <= 2) {
-            state.value = STATE.GAME_OVER
-            ctx.fillStyle = 'white'
-          } else {
-            for (let i = 0; i < tetromino.length; i++) {
-              let square = tetromino[i]
-              let x = square[0] + startX
-              let y = square[1] + startY
-              stoppedShapesArray[x][y] = currTetrominoColor
-            }
-            checkCompletedRows()
-            newTetrominoSpawn()
+        // bottom
+        if (y >= 20) {
+          collision = true
+          break
+        }
+      }
+      if (collision) {
+        // if startY of new tetromino <= 2 -> game over
+        if (startY <= 2) {
+          state.value = STATE.GAME_OVER
+          ctx.fillStyle = 'white'
+        } else {
+          for (let i = 0; i < tetromino.length; i++) {
+            let square = tetromino[i]
+            let x = square[0] + startX
+            let y = square[1] + startY
+            stoppedShapesArray[x][y] = currTetrominoColor
           }
+          checkCompletedRows()
+          createTetromino()
+
+          direction = DIRECTION.IDLE
+          startX = 4
+          startY = 0
+          drawTetromino()
         }
       }
       return collision
@@ -426,6 +458,14 @@ export default defineComponent({
 
     onMounted(() => {
       setupCanvas()
+
+      //state.value = STATE.PLAYING
+
+      window.setInterval(() => {
+        if (state.value === STATE.PLAYING) {
+          handleTetrominoArrowDown()
+        }
+      }, moveInterval)
     })
 
     return {
