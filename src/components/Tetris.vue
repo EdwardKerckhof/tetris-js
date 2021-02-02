@@ -1,5 +1,27 @@
 <template>
   <div class="tetris">
+    <div class="tetris-actions">
+      <button>Start / Pause</button>
+      <h3>
+        Score
+        <p>{{ score }}</p>
+      </h3>
+      <h3>
+        Level
+        <p>{{ level }}</p>
+      </h3>
+      <h3>
+        State
+        <p>{{ state }}</p>
+      </h3>
+      <h3>
+        Controls
+        <p class="control">ArrowDown: Move Down</p>
+        <p class="control">ArrowRight: Move Right</p>
+        <p class="control">ArrowLeft: Move Left</p>
+        <p class="control">ArrowUp: Rotate</p>
+      </h3>
+    </div>
     <canvas id="tetris-canvas" ref="canvas"></canvas>
   </div>
 </template>
@@ -33,6 +55,9 @@ export default defineComponent({
     let arrayWidth = 12
     let startX = 4
     let startY = 0
+    let score = ref(0)
+    let level = ref(1)
+    let state = ref('Playing')
     // Makes a 2d array with all possible coordinates and fills it with zeros (12x20)
     let coordArray = [...Array(arrayHeight)].map(() =>
       Array(arrayWidth).fill(0)
@@ -64,7 +89,12 @@ export default defineComponent({
       Array(arrayWidth).fill(0)
     )
 
-    let direction
+    // Makes a 2d array of the board and fills the already placed tetrominos (12x20)
+    let stoppedShapesArray = [...Array(arrayHeight)].map(() =>
+      Array(arrayWidth).fill(0)
+    )
+
+    let direction: number
 
     const populateCoordArray = () => {
       let i = 0
@@ -115,15 +145,19 @@ export default defineComponent({
       switch (e.key) {
         case 'ArrowLeft':
           direction = DIRECTION.LEFT
-          deleteTetromino()
-          startX--
-          drawTetromino()
+          if (!hitsWall()) {
+            deleteTetromino()
+            startX--
+            drawTetromino()
+          }
           break
         case 'ArrowRight':
           direction = DIRECTION.RIGHT
-          deleteTetromino()
-          startX++
-          drawTetromino()
+          if (!hitsWall()) {
+            deleteTetromino()
+            startX++
+            drawTetromino()
+          }
           break
         case 'ArrowDown':
           direction = DIRECTION.DOWN
@@ -148,7 +182,7 @@ export default defineComponent({
         [0, 0],
         [0, 1],
         [1, 1],
-        [2, 0]
+        [2, 1]
       ])
       // T
       tetrominos.push([
@@ -193,12 +227,24 @@ export default defineComponent({
       currTetrominoColor = tetrominosColors[randomTetroIndex]
     }
 
-    const setupCanvas = () => {
-      ctx = ((canvas.value as unknown) as HTMLCanvasElement).getContext('2d')!
-      ;((canvas.value as unknown) as HTMLCanvasElement).width = 936
-      ;((canvas.value as unknown) as HTMLCanvasElement).height = 956
+    const hitsWall = () => {
+      // check if ((x <= 0) || (x >= 11) && moving left or right) -> stop movement
+      for (let i = 0; i < currTetromino.length; i++) {
+        let x = currTetromino[i][0] + startX
+        // console.log(x)
+        if (x <= 0 && direction === DIRECTION.LEFT) return true
+        else if (x >= 11 && direction === DIRECTION.RIGHT) return true
+        return false
+      }
+    }
 
-      ctx.scale(2, 2)
+    const setupCanvas = () => {
+      const scale = 2
+      ctx = ((canvas.value as unknown) as HTMLCanvasElement).getContext('2d')!
+      ;((canvas.value as unknown) as HTMLCanvasElement).width = 296 * scale
+      ;((canvas.value as unknown) as HTMLCanvasElement).height = 478 * scale
+
+      ctx.scale(scale, scale)
       ctx.fillStyle = 'white'
       ctx.fillRect(
         0,
@@ -222,6 +268,9 @@ export default defineComponent({
     })
 
     return {
+      score,
+      level,
+      state,
       canvas
     }
   }
@@ -231,13 +280,59 @@ export default defineComponent({
 <style lang="scss" scoped>
 .tetris {
   display: flex;
-  flex-direction: column;
+  flex-direction: row-reverse;
   justify-content: center;
-  align-items: center;
   text-align: left;
 
-  #tetris-canvas {
-    background: red;
+  canvas {
+    margin-right: 50px;
+  }
+
+  .tetris-actions {
+    button {
+      background: none;
+      border: none;
+      font-size: 16px;
+      text-transform: uppercase;
+      border: 2px solid #2c3e50;
+      color: #2c3e50;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      outline: none;
+      margin-top: 10px;
+      transition: all 0.15s ease;
+
+      &:hover {
+        box-shadow: 0px 2px 5px rgba($color: #000000, $alpha: 0.15);
+      }
+    }
+
+    h3 {
+      margin: 20px 0;
+
+      p {
+        font-size: 16px;
+        padding: 5px 12px;
+        border: 2px solid #2c3e50;
+
+        &.control {
+          border: none;
+          border-right: 2px solid;
+          border-left: 2px solid;
+          text-transform: none;
+
+          &:nth-child(1) {
+            border-top: 2px solid;
+          }
+
+          &:nth-child(4) {
+            border-bottom: 2px solid;
+          }
+        }
+      }
+    }
   }
 }
 </style>
