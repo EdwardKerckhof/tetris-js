@@ -12,7 +12,9 @@
       </h3>
       <h3>
         State
-        <p>{{ state }}</p>
+        <p>
+          {{ state === 0 ? 'Playing' : state === 1 ? 'Game Over' : 'Paused' }}
+        </p>
       </h3>
       <h3>
         Controls
@@ -45,6 +47,12 @@ const DIRECTION = {
   RIGHT: 3
 }
 
+const STATE = {
+  PLAYING: 0,
+  GAME_OVER: 1,
+  PAUSED: 2
+}
+
 export default defineComponent({
   name: 'Tetris',
 
@@ -57,7 +65,7 @@ export default defineComponent({
     let startY = 0
     let score = ref(0)
     let level = ref(1)
-    let state = ref('Playing')
+    let state = ref(STATE.PLAYING)
     // Makes a 2d array with all possible coordinates and fills it with zeros (12x20)
     let coordArray = [...Array(arrayHeight)].map(() =>
       Array(arrayWidth).fill(0)
@@ -142,30 +150,123 @@ export default defineComponent({
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      switch (e.key) {
-        case 'ArrowLeft':
-          direction = DIRECTION.LEFT
-          if (!hitsWall()) {
-            deleteTetromino()
-            startX--
-            drawTetromino()
+      switch (state.value) {
+        case STATE.PLAYING:
+          switch (e.key) {
+            case 'ArrowLeft':
+              direction = DIRECTION.LEFT
+              if (!hitsWall() && !horizontalCollision()) {
+                deleteTetromino()
+                startX--
+                drawTetromino()
+              }
+              break
+            case 'ArrowRight':
+              direction = DIRECTION.RIGHT
+              if (!hitsWall() && !horizontalCollision()) {
+                deleteTetromino()
+                startX++
+                drawTetromino()
+              }
+              break
+            case 'ArrowDown':
+              handleTetrominoArrowDown()
+              break
           }
-          break
-        case 'ArrowRight':
-          direction = DIRECTION.RIGHT
-          if (!hitsWall()) {
-            deleteTetromino()
-            startX++
-            drawTetromino()
-          }
-          break
-        case 'ArrowDown':
-          direction = DIRECTION.DOWN
-          deleteTetromino()
-          startY++
-          drawTetromino()
           break
       }
+    }
+
+    const handleTetrominoArrowDown = () => {
+      direction = DIRECTION.DOWN
+      if (!verticalCollision()) {
+        deleteTetromino()
+        startY++
+        drawTetromino()
+      }
+    }
+
+    const hitsWall = () => {
+      // check if ((x <= 0) || (x >= 11) && moving left or right) -> stop movement
+      for (let i = 0; i < currTetromino.length; i++) {
+        let x = currTetromino[i][0] + startX
+        // console.log(x)
+        if (x <= 0 && direction === DIRECTION.LEFT) return true
+        else if (x >= 11 && direction === DIRECTION.RIGHT) return true
+        return false
+      }
+    }
+
+    const verticalCollision = () => {
+      let tetromino = currTetromino
+      let collision = false
+      for (let i = 0; i < tetromino.length; i++) {
+        let square = tetromino[i]
+        let x = square[0] + startX
+        let y = square[1] + startY
+
+        if (direction === DIRECTION.DOWN) y++
+        if (tetrisArray[x][y + 1] === 1) {
+          // if there is a string in the next down square it means it has a color so there is already a square in place
+          if (typeof stoppedShapesArray[x][y + 1] === 'string') {
+            deleteTetromino()
+            startY++
+            drawTetromino()
+            collision = true
+            break
+          }
+          // bottom
+          if (y >= 20) {
+            collision = true
+            break
+          }
+        }
+
+        if (collision) {
+          // if startY of new tetromino <= 2 -> game over
+          if (startY <= 2) {
+            state.value = STATE.GAME_OVER
+            ctx.fillStyle = 'white'
+          } else {
+            for (let i = 0; i < tetromino.length; i++) {
+              let square = tetromino[i]
+              let x = square[0] + startX
+              let y = square[1] + startY
+              stoppedShapesArray[x][y] = currTetrominoColor
+            }
+            checkCompletedRows()
+            newTetrominoSpawn()
+          }
+        }
+      }
+      return collision
+    }
+
+    const horizontalCollision = () => {
+      let tetromino = currTetromino
+      for (let i = 0; i < tetromino.length; i++) {
+        let square = tetromino[i]
+        let x = square[0] + startX
+        let y = square[1] + startY
+
+        if (direction === DIRECTION.LEFT) x--
+        else if (direction === DIRECTION.RIGHT) x++
+        // if there is a string in the next down square it means it has a color so there is already a square in place
+        if (typeof stoppedShapesArray[x][y] === 'string') {
+          return true
+        }
+      }
+      return false
+    }
+
+    const checkCompletedRows = () => {}
+
+    const newTetrominoSpawn = () => {
+      createTetromino()
+      direction = DIRECTION.IDLE
+      startX = 4
+      startY = 0
+      drawTetromino()
     }
 
     // creates all tetromino shapes
@@ -225,17 +326,6 @@ export default defineComponent({
       let randomTetroIndex = Math.floor(Math.random() * tetrominos.length)
       currTetromino = tetrominos[randomTetroIndex]
       currTetrominoColor = tetrominosColors[randomTetroIndex]
-    }
-
-    const hitsWall = () => {
-      // check if ((x <= 0) || (x >= 11) && moving left or right) -> stop movement
-      for (let i = 0; i < currTetromino.length; i++) {
-        let x = currTetromino[i][0] + startX
-        // console.log(x)
-        if (x <= 0 && direction === DIRECTION.LEFT) return true
-        else if (x >= 11 && direction === DIRECTION.RIGHT) return true
-        return false
-      }
     }
 
     const setupCanvas = () => {
