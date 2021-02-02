@@ -331,8 +331,8 @@ export default defineComponent({
         // console.log(x)
         if (x <= 0 && direction === DIRECTION.LEFT) return true
         else if (x >= 11 && direction === DIRECTION.RIGHT) return true
-        return false
       }
+      return false
     }
 
     // Check for vertical collision
@@ -408,23 +408,27 @@ export default defineComponent({
       // Copy currTetromino to try and move this "fake" tetromino
       // and check for any collisions with a stopped tetromino
       // before actually moving the currTetromino
-      let tetromino = currTetromino
+      let tetrominoFake = currTetromino
       let collision = false
 
       // Cycle through the squares
-      for (let i = 0; i < tetromino.length; i++) {
+      for (let i = 0; i < tetrominoFake.length; i++) {
         // Get the square and move it into position using the upper left had coords
-        let square = tetromino[i]
+        let square = tetrominoFake[i]
         let x = square[0] + startX
         let y = square[1] + startY
 
         // Move the clone into position base on direction
-        if (direction === DIRECTION.LEFT) x--
-        else if (direction === DIRECTION.RIGHT) x++
+        if (direction === DIRECTION.LEFT) {
+          x--
+        } else if (direction === DIRECTION.RIGHT) {
+          x++
+        }
 
         // Get the potential stopped square
+        let stoppedShape = stoppedShapesArray[x][y]
         // If there is a string in the next down square it means it has a color so there is already a square in place
-        if (typeof stoppedShapesArray[x][y] === 'string') {
+        if (typeof stoppedShape === 'string') {
           collision = true
           break
         }
