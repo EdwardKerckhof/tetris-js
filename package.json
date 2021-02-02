@@ -1,7 +1,7 @@
 {
   "name": "tetris-vue",
-  "version": "0.0.1",
-  "description": "Vue tetris game.",
+  "version": "1.0.0",
+  "description": "Vue tetris game",
   "scripts": {
     "dev": "vite",
     "build": "vuedx-typecheck . && vite build",
@@ -18,12 +18,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/EdwardKerckhofZoneDev/vue-sodoku-solver.git"
+    "url": "https://github.com/EdwardKerckhofZoneDev/tetris-js.git"
   },
   "bugs": {
-    "url": "https://github.com/EdwardKerckhofZoneDev/vue-sodoku-solver/issues"
+    "url": "https://github.com/EdwardKerckhofZoneDev/tetris-js/issues"
   },
-  "homepage": "https://github.com/EdwardKerckhofZoneDev/vue-sodoku-solver#readme",
+  "homepage": "https://github.com/EdwardKerckhofZoneDev/tetris-js#readme",
   "private": false,
   "license": "MIT",
   "dependencies": {
