@@ -22,4 +22,5 @@ yarn dev
 - [ ] Add hiscores to localstorage
 - [ ] Display previous hiscores with date
 - [ ] Better message when game over
+- [ ] Code refactoring
 - [x] Make game playable
