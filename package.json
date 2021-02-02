@@ -4,7 +4,7 @@
   "description": "Vue tetris game",
   "scripts": {
     "dev": "vite",
-    "build": "vuedx-typecheck . && vite build",
+    "build": "vite build && cp .htaccess dist/.htaccess",
     "serve": "vite preview",
     "lint": "eslint --ext .js,.vue src --ignore-path .gitignore ."
   },
