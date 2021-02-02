@@ -61,7 +61,7 @@ export default defineComponent({
     let level = ref(1) // vue ref for level, start at 1
     let score = ref(0) // vue ref for the score, start at 0
     let state = ref(STATE.PAUSED) // vue ref for state, starting at paused
-    let moveInterval = 1000 // interval for automatically moving tetronomes down (starts at 1 second, decrease each level)
+    let moveInterval = 1000 // interval for automatically moving tetromino down (starts at 1 second, decrease each level)
 
     let ctx: CanvasRenderingContext2D // canvas context 2d
     let arrayHeight = 20 // cells(21x21) in array height
@@ -75,6 +75,7 @@ export default defineComponent({
       Array(arrayWidth).fill(0)
     )
     // T-shape
+    // 1 = fill
     let currTetromino = [
       [1, 0], // x = 1, y = 0
       [0, 1], // x = 0, y = 1
@@ -82,7 +83,7 @@ export default defineComponent({
       [2, 1]
     ]
 
-    // Array that holds all possible tetrominos
+    // Array that will hold all possible tetrominos
     let tetrominos: Array<number[][]> = []
 
     // Array that holds all possible colors for the tetrominos
@@ -95,19 +96,38 @@ export default defineComponent({
       'green',
       'red'
     ]
+
+    // Holds current tetromino color
     let currTetrominoColor: string
 
-    // Makes a 2d array of the board and fills it with zeros (12x20)
+    // Makes a 2d array of the game board and fills it with zeros (12x20)
+    // This keeps track of where all the current squares are
     let tetrisArray = [...Array(arrayHeight)].map(() =>
       Array(arrayWidth).fill(0)
     )
 
     // Makes a 2d array of the board and fills the already placed tetrominos (12x20)
+    // Adds the color of the tetromino when it stops
     let stoppedShapesArray = [...Array(arrayHeight)].map(() =>
       Array(arrayWidth).fill(0)
     )
 
+    // Holds current direction of new tetromino
     let direction: number
+
+    // setupCanvas and setInterval for when state = playing to automatically move the tetromino down
+    // on component load
+    onMounted(() => {
+      setupCanvas()
+
+      //state.value = STATE.PLAYING
+
+      window.setInterval(() => {
+        if (state.value === STATE.PLAYING) {
+          handleTetrominoArrowDown()
+        }
+      }, moveInterval)
+    })
 
     const populateCoordArray = () => {
       let i = 0
@@ -195,27 +215,34 @@ export default defineComponent({
     }
 
     function handleTetrominoRotation() {
-      let newRotation = new Array()
+      let newRotation = []
       let tetromino = currTetromino
-      let currTetrominoBak
+      let currTetrominoBak: number[][] = []
+
       for (let i = 0; i < tetromino.length; i++) {
+        // Make a backup to handle any rotation errors to go back to
+        // Cloning the array instead of creating a refference
         currTetrominoBak = [...currTetromino]
+
+        // Find new rotation by getting the x value of the last square of the tetromino
+        // Orientate other squares based on it
         let x = tetromino[i][0]
         let y = tetromino[i][1]
         let newX = getLastSquareX() - y
         let newY = x
         newRotation.push([newX, newY])
-        deleteTetromino()
-        try {
-          currTetromino = newRotation
+      }
+
+      deleteTetromino()
+      try {
+        currTetromino = newRotation
+        drawTetromino()
+      } catch (error) {
+        // TypeError -> try to find value that doesn't exist (drawing outside canvas)
+        if (error instanceof TypeError) {
+          currTetromino = currTetrominoBak
+          deleteTetromino()
           drawTetromino()
-        } catch (error) {
-          // TypeError -> try to find value that doesn't exist (drawing outside canvas)
-          if (error instanceof TypeError) {
-            currTetromino = currTetrominoBak
-            deleteTetromino()
-            drawTetromino()
-          }
         }
       }
     }
@@ -432,7 +459,7 @@ export default defineComponent({
     }
 
     const setupCanvas = () => {
-      const scale = 2
+      const scale = 1
       ctx = ((canvas.value as unknown) as HTMLCanvasElement).getContext('2d')!
       ;((canvas.value as unknown) as HTMLCanvasElement).width = 296 * scale
       ;((canvas.value as unknown) as HTMLCanvasElement).height = 478 * scale
@@ -455,18 +482,6 @@ export default defineComponent({
       populateCoordArray()
       drawTetromino()
     }
-
-    onMounted(() => {
-      setupCanvas()
-
-      //state.value = STATE.PLAYING
-
-      window.setInterval(() => {
-        if (state.value === STATE.PLAYING) {
-          handleTetrominoArrowDown()
-        }
-      }, moveInterval)
-    })
 
     return {
       score,
