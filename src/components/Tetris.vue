@@ -65,7 +65,7 @@ export default defineComponent({
     let startY = 0
     let score = ref(0)
     let level = ref(1)
-    let state = ref(STATE.PLAYING)
+    let state = ref(STATE.PAUSED)
     // Makes a 2d array with all possible coordinates and fills it with zeros (12x20)
     let coordArray = [...Array(arrayHeight)].map(() =>
       Array(arrayWidth).fill(0)
@@ -172,10 +172,15 @@ export default defineComponent({
             case 'ArrowDown':
               handleTetrominoArrowDown()
               break
+            case 'ArrowUp':
+              handleTetrominoRotation()
+              break
           }
           break
       }
     }
+
+    const handleTetrominoRotation = () => {}
 
     const handleTetrominoArrowDown = () => {
       direction = DIRECTION.DOWN
@@ -195,6 +200,82 @@ export default defineComponent({
         else if (x >= 11 && direction === DIRECTION.RIGHT) return true
         return false
       }
+    }
+
+    const checkCompletedRows = () => {
+      let rowsToDelete = 0
+      let startOfDeletion = 0
+      for (let y = 0; y < arrayHeight; y++) {
+        let completed = true
+        for (let x = 0; x < arrayWidth; x++) {
+          let square = stoppedShapesArray[x][y]
+          // square = 0 (nothing there) of it's of type undefined (so not string) -> not completed
+          if (square === 0 || typeof square === 'undefined') {
+            completed = false
+            break
+          }
+        }
+
+        if (completed) {
+          if (startOfDeletion === 0) startOfDeletion = y
+          rowsToDelete++
+
+          for (let i = 0; i < arrayWidth; i++) {
+            // set values in stopped and current board array (tetrisArray) to 0, meaning nothing is there
+            stoppedShapesArray[i][y] = 0
+            tetrisArray[i][y] = 0
+            let coordX = coordArray[i][y].x
+            let coordY = coordArray[i][y].y
+            // color squares to delete white
+            ctx.fillStyle = 'white'
+            ctx.fillRect(coordX, coordY, 21, 21)
+          }
+        }
+      }
+
+      // if a row needs to be deleted add 10 to score
+      if (rowsToDelete > 0) {
+        score.value += 10
+        moveAllRowsDown(rowsToDelete, startOfDeletion)
+      }
+    }
+
+    const moveAllRowsDown = (rows: number, start: number) => {
+      // move from start to 0
+      for (let i = start - 1; i >= 0; i--) {
+        for (let x = 0; x < arrayWidth; x++) {
+          let y2 = i + rows
+          let square = stoppedShapesArray[x][i]
+          let nextSquare = stoppedShapesArray[x][y2]
+          if (typeof square === 'string') {
+            nextSquare = square
+            tetrisArray[x][y2] = 1
+            stoppedShapesArray[x][y2] = square
+            let coordX = coordArray[x][y2].x
+            let coordY = coordArray[x][y2].y
+            // color squares to delete white
+            ctx.fillStyle = nextSquare
+            ctx.fillRect(coordX, coordY, 21, 21)
+
+            square = 0
+            tetrisArray[x][i] = 0
+            stoppedShapesArray[x][i] = 0
+            coordX = coordArray[x][i].x
+            coordY = coordArray[x][i].y
+            // color squares to delete white
+            ctx.fillStyle = 'white'
+            ctx.fillRect(coordX, coordY, 21, 21)
+          }
+        }
+      }
+    }
+
+    const newTetrominoSpawn = () => {
+      createTetromino()
+      direction = DIRECTION.IDLE
+      startX = 4
+      startY = 0
+      drawTetromino()
     }
 
     const verticalCollision = () => {
@@ -257,16 +338,6 @@ export default defineComponent({
         }
       }
       return false
-    }
-
-    const checkCompletedRows = () => {}
-
-    const newTetrominoSpawn = () => {
-      createTetromino()
-      direction = DIRECTION.IDLE
-      startX = 4
-      startY = 0
-      drawTetromino()
     }
 
     // creates all tetromino shapes
