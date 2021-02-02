@@ -16,7 +16,7 @@ class coordinate {
   }
 }
 
-let DIRECTION = {
+const DIRECTION = {
   IDLE: 0,
   DOWN: 1,
   LEFT: 2,
@@ -29,13 +29,13 @@ export default defineComponent({
   setup() {
     const canvas = ref(null)
     let ctx: CanvasRenderingContext2D
-    let canvasHeight = 20
-    let canvasWidth = 12
+    let arrayHeight = 20
+    let arrayWidth = 12
     let startX = 4
     let startY = 0
-    // Makes a 2d array with all possible coordinates in pixels
-    let coordArray = [...Array(canvasHeight)].map(() =>
-      Array(canvasWidth).fill(0)
+    // Makes a 2d array with all possible coordinates and fills it with zeros (12x20)
+    let coordArray = [...Array(arrayHeight)].map(() =>
+      Array(arrayWidth).fill(0)
     )
     let currTetromino = [
       [1, 0], // x = 1, y = 0
@@ -59,8 +59,9 @@ export default defineComponent({
     ]
     let currTetrominoColor: string
 
-    let tetrisArray = [...Array(canvasHeight)].map(() =>
-      Array(canvasWidth).fill(0)
+    // Makes a 2d array of the board and fills it with zeros (12x20)
+    let tetrisArray = [...Array(arrayHeight)].map(() =>
+      Array(arrayWidth).fill(0)
     )
 
     let direction
