@@ -17,7 +17,6 @@ yarn dev
 
 ### TODO
 
-- [x] Add
 - [x] Add start/pause with escape
 - [x] Add reset
 - [x] Show next piece
