@@ -1,7 +1,7 @@
 <template>
   <div class="tetris">
     <div class="tetris-actions">
-      <button>Start / Pause</button>
+      <button @click="startPause">Start / Pause</button>
       <h3>
         Score
         <p>{{ score }}</p>
@@ -28,32 +28,22 @@
     <div class="tetrix-next">
       <h3>Up next:</h3>
       <div class="next">
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
+        <div v-for="i in 4" :key="i">
+          <div
+            v-for="(el, j) in 2"
+            :key="j"
+            :data-x="i - 1"
+            :data-y="j"
+            class="nextData"
+          ></div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue'
+import { defineComponent, nextTick, onMounted, ref } from 'vue'
 
 class coordinate {
   x: number
@@ -155,9 +145,8 @@ export default defineComponent({
     // on component load
     onMounted(() => {
       setupCanvas()
+      setupNextTetromino()
       setSpeed(movingSpeed)
-
-      // state.value = STATE.PLAYING
     })
 
     // Populates the coordArray with square coordinates [x (pixels), y (pixels)]
@@ -234,7 +223,7 @@ export default defineComponent({
     // Deletes the previously drawn shape, then draws the new one
     const handleKeyDown = (e: KeyboardEvent) => {
       switch (state.value) {
-        case STATE.PAUSED:
+        case STATE.PLAYING:
           switch (e.key) {
             case 'ArrowLeft':
               direction = DIRECTION.LEFT
@@ -344,7 +333,6 @@ export default defineComponent({
     // Sets a random tetromino and its color to the currentTetromino
     const setCurrentTetromino = (tetromino: number[][]) => {
       currTetromino = tetromino
-      currTetrominoColor = currTetrominoColor
     }
 
     // Sets a random tetromino and its color to the nextTetromino
@@ -352,6 +340,31 @@ export default defineComponent({
       let randomTetroIndex = Math.floor(Math.random() * tetrominos.length) // get a random index
       nextTetromino.value = tetrominos[randomTetroIndex] // set currect tetromino to a random one with the created index
       currTetrominoColor = tetrominosColors[randomTetroIndex] // set new random tetromino color
+      setupNextTetromino()
+    }
+
+    const setupNextTetromino = () => {
+      nextTick(() => {
+        let randomTetroIndex = Math.floor(Math.random() * tetrominos.length) // get a random index
+        let color = tetrominosColors[randomTetroIndex]
+        document.querySelectorAll('.nextData').forEach((div) => {
+          ;(div as HTMLDivElement).style.background = 'transparent'
+
+          let coords = [
+            (div as HTMLDivElement).dataset.x,
+            (div as HTMLDivElement).dataset.y
+          ]
+
+          nextTetromino.value.forEach((square: any) => {
+            if (
+              Number(square[0]) === Number(coords[0]) &&
+              Number(square[1]) === Number(coords[1])
+            ) {
+              ;(div as HTMLDivElement).style.background = 'white'
+            }
+          })
+        })
+      })
     }
 
     // Check if tetromino hits the wall
@@ -601,12 +614,17 @@ export default defineComponent({
       return lastX
     }
 
+    const startPause = () => {
+      if (state.value === STATE.PAUSED) state.value = 0
+      else if (state.value === STATE.PLAYING) state.value = 2
+    }
+
     return {
       score,
       level,
       state,
       canvas,
-      nextTetromino
+      startPause
     }
   }
 })

@@ -17,9 +17,9 @@ yarn dev
 
 ### TODO
 
-- [ ] Add start/pause
+- [x] Add start/pause
 - [ ] Add reset
-- [ ] Show next piece
+- [x] Show next piece
 - [ ] Add hiscores to localstorage
 - [ ] Display previous hiscores with date
 - [ ] Better message when game over
