@@ -33,17 +33,30 @@
       </div>
       <canvas id="tetris-canvas" ref="canvas"> </canvas>
     </div>
-    <div class="tetrix-next">
-      <h3>Up next:</h3>
-      <div class="next">
-        <div v-for="i in 4" :key="i">
-          <div
-            v-for="(el, j) in 2"
-            :key="j"
-            :data-x="i - 1"
-            :data-y="j"
-            class="nextData"
-          ></div>
+    <div class="tetris-info">
+      <div>
+        <h3>Up next</h3>
+        <div class="info">
+          <div v-for="i in 4" :key="i">
+            <div
+              v-for="(el, j) in 2"
+              :key="j"
+              :data-x="i - 1"
+              :data-y="j"
+              class="nextData"
+            ></div>
+          </div>
+        </div>
+      </div>
+      <div class="hiscores">
+        <h3>Hiscores</h3>
+        <div v-if="hiscores.length > 0">
+          <p v-for="(hiscore, i) in hiscores" :key="i">
+            {{ formatDate(hiscore.date) }}: {{ hiscore.score }}
+          </p>
+        </div>
+        <div v-else>
+          <p>/</p>
         </div>
       </div>
     </div>
@@ -83,10 +96,11 @@ export default defineComponent({
     let level = ref(1) // vue ref for level, start at 1
     let score = ref(0) // vue ref for the score, start at 0
     let state = ref(STATE.PLAYING) // vue ref for state, starting at paused
-    let nextTetromino = ref()
+    let nextTetromino = ref() // vue ref to display the next tetromino
+    let hiscores = ref([]) // vue ref for the hiscores
     let timer: any // interval for automatically moving tetromino down (starts at 1 second, decrease each level)
     let movingSpeed = 1
-    let levelUp = 20
+    let levelUp = 15
 
     let ctx: CanvasRenderingContext2D // canvas context 2d
     let arrayHeight = 20 // cells(21x21) in array height
@@ -154,6 +168,7 @@ export default defineComponent({
     onMounted(() => {
       setupCanvas()
       setupNextTetromino()
+      setupHiscores()
       setSpeed(movingSpeed)
     })
 
@@ -428,6 +443,24 @@ export default defineComponent({
         // If startY of new tetromino <= 1 -> game over
         if (startY <= 1) {
           state.value = STATE.GAME_OVER
+
+          // Add score to localstorage if score > 0
+          if (score.value > 0) {
+            // Get previously stored scores
+            let scores = []
+            // Object to store
+            const obj = {
+              score: score.value,
+              date: new Date()
+            }
+            // If scores are already stored, get those first
+            if (localStorage.getItem('tetris-score')) {
+              scores = JSON.parse(localStorage.getItem('tetris-score')!)
+            }
+            // Push new score object
+            scores.push(obj)
+            localStorage.setItem('tetris-score', JSON.stringify(scores))
+          }
         } else {
           // No collisions so add stopped tetromino to stoppedShapesArray
           for (let i = 0; i < tetromino.length; i++) {
@@ -531,7 +564,7 @@ export default defineComponent({
 
       // If a row needs to be deleted add 10 to score
       if (rowsToDelete > 0) {
-        score.value += 10 // increment score
+        score.value += 10 * rowsToDelete * level.value // increment score
         moveAllRowsDown(rowsToDelete, startOfDeletion) // move all rows down
 
         if (score.value % levelUp === 0) {
@@ -623,6 +656,7 @@ export default defineComponent({
       return lastX
     }
 
+    // Plays / pauses game
     const startPause = () => {
       if (state.value !== STATE.GAME_OVER) {
         if (state.value === STATE.PAUSED) state.value = 0
@@ -630,8 +664,30 @@ export default defineComponent({
       }
     }
 
+    // Restarts game
     const restartGame = () => {
+      // Reloads all variables
+      // Could do this manually but this ensures everything works correctly
       location.reload()
+    }
+
+    // Gets scores from localstorage at start of page load
+    // Stores them in a ref
+    const setupHiscores = () => {
+      if (localStorage.getItem('tetris-score'))
+        hiscores.value = JSON.parse(localStorage.getItem('tetris-score')!)
+      else hiscores.value = []
+    }
+
+    // Formats the date
+    const formatDate = (value: string) => {
+      if (value) {
+        let dateArr = value.split('-')
+        let month = dateArr[1]
+        let day = dateArr[2].split('T')[0]
+        console.log(month, day)
+        return `${day}/${month}`
+      }
     }
 
     return {
@@ -640,7 +696,9 @@ export default defineComponent({
       state,
       canvas,
       startPause,
-      restartGame
+      restartGame,
+      hiscores,
+      formatDate
     }
   }
 })
