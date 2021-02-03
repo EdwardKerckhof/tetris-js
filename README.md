@@ -17,11 +17,13 @@ yarn dev
 
 ### TODO
 
-- [x] Add start/pause
-- [ ] Add reset
+- [x] Add
+- [x] Add start/pause with escape
+- [x] Add reset
 - [x] Show next piece
 - [ ] Add hiscores to localstorage
 - [ ] Display previous hiscores with date
-- [ ] Better message when game over
+- [x] Better state UI
+- [ ] Improve score based on level
 - [ ] Code refactoring
 - [x] Make game playable

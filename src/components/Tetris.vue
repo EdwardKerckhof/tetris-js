@@ -1,7 +1,10 @@
 <template>
   <div class="tetris">
     <div class="tetris-actions">
-      <button @click="startPause">Start / Pause</button>
+      <button @click="startPause" v-if="state !== 1">
+        {{ state === 0 ? 'Pause ' : 'Play' }} (esc)
+      </button>
+      <button @click="restartGame" v-else>Restart</button>
       <h3>
         Score
         <p>{{ score }}</p>
@@ -24,7 +27,12 @@
         <p class="control">ArrowUp: Rotate</p>
       </h3>
     </div>
-    <canvas id="tetris-canvas" ref="canvas"></canvas>
+    <div class="canvas-wrap">
+      <div class="state-modal" v-if="state === 1 || state === 2">
+        <h1>{{ state === 1 ? 'Game Over' : 'Paused' }}</h1>
+      </div>
+      <canvas id="tetris-canvas" ref="canvas"> </canvas>
+    </div>
     <div class="tetrix-next">
       <h3>Up next:</h3>
       <div class="next">
@@ -74,7 +82,7 @@ export default defineComponent({
     const canvas = ref(null) // vue ref for canvas element
     let level = ref(1) // vue ref for level, start at 1
     let score = ref(0) // vue ref for the score, start at 0
-    let state = ref(STATE.PAUSED) // vue ref for state, starting at paused
+    let state = ref(STATE.PLAYING) // vue ref for state, starting at paused
     let nextTetromino = ref()
     let timer: any // interval for automatically moving tetromino down (starts at 1 second, decrease each level)
     let movingSpeed = 1
@@ -222,6 +230,7 @@ export default defineComponent({
     // Every time a key is pressed we change either the x or y value to where we want to the new tetromino to be drawn
     // Deletes the previously drawn shape, then draws the new one
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') startPause()
       switch (state.value) {
         case STATE.PLAYING:
           switch (e.key) {
@@ -615,8 +624,14 @@ export default defineComponent({
     }
 
     const startPause = () => {
-      if (state.value === STATE.PAUSED) state.value = 0
-      else if (state.value === STATE.PLAYING) state.value = 2
+      if (state.value !== STATE.GAME_OVER) {
+        if (state.value === STATE.PAUSED) state.value = 0
+        else if (state.value === STATE.PLAYING) state.value = 2
+      }
+    }
+
+    const restartGame = () => {
+      location.reload()
     }
 
     return {
@@ -624,7 +639,8 @@ export default defineComponent({
       level,
       state,
       canvas,
-      startPause
+      startPause,
+      restartGame
     }
   }
 })
