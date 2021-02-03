@@ -674,20 +674,26 @@ export default defineComponent({
     // Gets scores from localstorage at start of page load
     // Stores them in a ref
     const setupHiscores = () => {
-      if (localStorage.getItem('tetris-score'))
-        hiscores.value = JSON.parse(localStorage.getItem('tetris-score')!)
-      else hiscores.value = []
+      if (localStorage.getItem('tetris-score')) {
+        hiscores.value = JSON.parse(localStorage.getItem('tetris-score')!).sort(
+          compare
+        )
+      } else hiscores.value = []
+    }
+
+    const compare = (
+      a: { score: number; date: Date },
+      b: { score: number; date: Date }
+    ) => {
+      if (a.score < b.score) return 1
+      if (a.score > b.score) return -1
+      return 0
     }
 
     // Formats the date
     const formatDate = (value: string) => {
-      if (value) {
-        let dateArr = value.split('-')
-        let month = dateArr[1]
-        let day = dateArr[2].split('T')[0]
-        console.log(month, day)
-        return `${day}/${month}`
-      }
+      if (value)
+        return `${value.split('-')[2].split('T')[0]}/${value.split('-')[1]}`
     }
 
     return {
