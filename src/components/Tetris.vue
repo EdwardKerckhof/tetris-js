@@ -564,7 +564,7 @@ export default defineComponent({
 
       // If a row needs to be deleted add 10 to score
       if (rowsToDelete > 0) {
-        score.value += 10 * rowsToDelete * level.value // increment score
+        score.value += 10 * level.value // increment score
         moveAllRowsDown(rowsToDelete, startOfDeletion) // move all rows down
 
         if (score.value % levelUp === 0) {

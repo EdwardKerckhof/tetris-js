@@ -21,9 +21,9 @@ yarn dev
 - [x] Add start/pause with escape
 - [x] Add reset
 - [x] Show next piece
-- [ ] Add hiscores to localstorage
-- [ ] Display previous hiscores with date
+- [x] Add hiscores to localstorage
+- [x] Display previous hiscores with date
 - [x] Better state UI
-- [ ] Improve score based on level
+- [x] Improve score based on level
 - [ ] Code refactoring
 - [x] Make game playable
