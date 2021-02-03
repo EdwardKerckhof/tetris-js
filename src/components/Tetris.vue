@@ -25,6 +25,30 @@
       </h3>
     </div>
     <canvas id="tetris-canvas" ref="canvas"></canvas>
+    <div class="tetrix-next">
+      <h3>Up next:</h3>
+      <div class="next">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -61,6 +85,7 @@ export default defineComponent({
     let level = ref(1) // vue ref for level, start at 1
     let score = ref(0) // vue ref for the score, start at 0
     let state = ref(STATE.PAUSED) // vue ref for state, starting at paused
+    let nextTetromino = ref()
     let timer: any // interval for automatically moving tetromino down (starts at 1 second, decrease each level)
     let movingSpeed = 1
     let levelUp = 20
@@ -132,7 +157,7 @@ export default defineComponent({
       setupCanvas()
       setSpeed(movingSpeed)
 
-      state.value = STATE.PLAYING
+      // state.value = STATE.PLAYING
     })
 
     // Populates the coordArray with square coordinates [x (pixels), y (pixels)]
@@ -182,8 +207,8 @@ export default defineComponent({
       // Create all possible tetrominos
       createTetrominos()
 
-      // Create random tetromino
-      createTetromino()
+      // Creates random next tetromino
+      createNextTetromino()
 
       // Populate the lookup table
       populateCoordArray()
@@ -209,7 +234,7 @@ export default defineComponent({
     // Deletes the previously drawn shape, then draws the new one
     const handleKeyDown = (e: KeyboardEvent) => {
       switch (state.value) {
-        case STATE.PLAYING:
+        case STATE.PAUSED:
           switch (e.key) {
             case 'ArrowLeft':
               direction = DIRECTION.LEFT
@@ -317,9 +342,15 @@ export default defineComponent({
     }
 
     // Sets a random tetromino and its color to the currentTetromino
-    const createTetromino = () => {
+    const setCurrentTetromino = (tetromino: number[][]) => {
+      currTetromino = tetromino
+      currTetrominoColor = currTetrominoColor
+    }
+
+    // Sets a random tetromino and its color to the nextTetromino
+    const createNextTetromino = () => {
       let randomTetroIndex = Math.floor(Math.random() * tetrominos.length) // get a random index
-      currTetromino = tetrominos[randomTetroIndex] // set currect tetromino to a random one with the created index
+      nextTetromino.value = tetrominos[randomTetroIndex] // set currect tetromino to a random one with the created index
       currTetrominoColor = tetrominosColors[randomTetroIndex] // set new random tetromino color
     }
 
@@ -389,7 +420,8 @@ export default defineComponent({
           checkCompletedRows()
 
           // Creates next new tetromino
-          createTetromino()
+          setCurrentTetromino(nextTetromino.value)
+          createNextTetromino()
 
           // Reset its values
           direction = DIRECTION.IDLE
@@ -573,68 +605,13 @@ export default defineComponent({
       score,
       level,
       state,
-      canvas
+      canvas,
+      nextTetromino
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
-.tetris {
-  display: flex;
-  flex-direction: row-reverse;
-  justify-content: center;
-  text-align: left;
-
-  canvas {
-    margin-right: 50px;
-  }
-
-  .tetris-actions {
-    button {
-      background: none;
-      border: none;
-      font-size: 16px;
-      text-transform: uppercase;
-      border: 2px solid #2c3e50;
-      color: #2c3e50;
-      padding: 5px 10px;
-      border-radius: 5px;
-      font-weight: bold;
-      cursor: pointer;
-      outline: none;
-      margin-top: 10px;
-      transition: all 0.15s ease;
-
-      &:hover {
-        box-shadow: 0px 2px 5px rgba($color: #000000, $alpha: 0.15);
-      }
-    }
-
-    h3 {
-      margin: 20px 0;
-
-      p {
-        font-size: 16px;
-        padding: 5px 12px;
-        border: 2px solid #2c3e50;
-
-        &.control {
-          border: none;
-          border-right: 2px solid;
-          border-left: 2px solid;
-          text-transform: none;
-
-          &:nth-child(1) {
-            border-top: 2px solid;
-          }
-
-          &:nth-child(4) {
-            border-bottom: 2px solid;
-          }
-        }
-      }
-    }
-  }
-}
+@import '../assets/scss/tetris.scss';
 </style>
