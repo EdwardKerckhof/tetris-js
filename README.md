@@ -25,5 +25,6 @@ yarn dev
 - [x] Display previous hiscores with date
 - [x] Better state UI
 - [x] Improve score based on level
+- [ ] Keep a max of 10 hiscores in localstorage
 - [ ] Code refactoring
 - [x] Make game playable
