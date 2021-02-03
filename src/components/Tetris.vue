@@ -1,10 +1,10 @@
 <template>
   <div class="tetris">
     <div class="tetris-actions">
-      <button @click="startPause" v-if="state !== 1">
+      <button v-if="state !== 1" @click="startPause">
         {{ state === 0 ? 'Pause ' : 'Play' }} (esc)
       </button>
-      <button @click="restartGame" v-else>Restart</button>
+      <button v-else @click="restartGame">Restart</button>
       <h3>
         Score
         <p>{{ score }}</p>
@@ -28,7 +28,7 @@
       </h3>
     </div>
     <div class="canvas-wrap">
-      <div class="state-modal" v-if="state === 1 || state === 2">
+      <div v-if="state === 1 || state === 2" class="state-modal">
         <h1>{{ state === 1 ? 'Game Over' : 'Paused' }}</h1>
       </div>
       <canvas id="tetris-canvas" ref="canvas"> </canvas>
@@ -49,7 +49,7 @@
         </div>
       </div>
       <div class="hiscores">
-        <h3>Hiscores</h3>
+        <h3>High scores</h3>
         <div v-if="hiscores.length > 0">
           <p v-for="(hiscore, i) in hiscores" :key="i">
             {{ formatDate(hiscore.date) }}: {{ hiscore.score }}
@@ -369,8 +369,6 @@ export default defineComponent({
 
     const setupNextTetromino = () => {
       nextTick(() => {
-        let randomTetroIndex = Math.floor(Math.random() * tetrominos.length) // get a random index
-        let color = tetrominosColors[randomTetroIndex]
         document.querySelectorAll('.nextData').forEach((div) => {
           ;(div as HTMLDivElement).style.background = 'transparent'
 
